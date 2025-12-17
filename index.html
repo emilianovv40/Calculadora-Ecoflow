@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0a7cff" />
+
+  <title>Calculadora EcoFlow</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Calculadora EcoFlow">
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary:#0a7cff;
+      --primary-dark:#055ec0;
+      --bg:#f4f7fb;
+      --card:#ffffff;
+      --text:#1f2937;
+      --muted:#6b7280;
+      --success:#16a34a;
+      --warning:#dc2626;
+      --info:#0284c7;
+    }
+
+    * { box-sizing:border-box; }
+
+    body {
+      margin:0;
+      font-family:'Inter', sans-serif;
+      background:linear-gradient(180deg,#eef3fb,#f9fbff);
+      color:var(--text);
+      padding:20px;
+    }
+
+    .app { max-width:900px; margin:auto; }
+
+    header {
+      display:flex;
+      align-items:center;
+      gap:12px;
+      margin-bottom:20px;
+    }
+
+    .logo {
+      width:44px;
+      height:44px;
+      border-radius:12px;
+      background:linear-gradient(135deg,var(--primary),#60a5fa);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:white;
+      font-weight:700;
+    }
+
+    h1 { font-size:20px; margin:0; }
+    .subtitle { font-size:13px; color:var(--muted); }
+
+    .card {
+      background:var(--card);
+      border-radius:20px;
+      padding:22px;
+      box-shadow:0 20px 40px rgba(0,0,0,.08);
+      margin-bottom:18px;
+    }
+
+    label {
+      font-size:13px;
+      font-weight:600;
+      display:block;
+      margin-bottom:6px;
+    }
+
+    input, select {
+      width:100%;
+      padding:12px;
+      border-radius:12px;
+      border:1px solid #e5e7eb;
+      font-size:14px;
+    }
+
+    button {
+      padding:14px;
+      border-radius:14px;
+      border:none;
+      font-weight:600;
+      cursor:pointer;
+      font-size:14px;
+    }
+
+    .primary { background:var(--primary); color:white; }
+    .secondary { background:#eef2ff; color:var(--primary); }
+    .danger { background:#fee2e2; color:#991b1b; }
+
+    .actions { display:flex; gap:10px; flex-wrap:wrap; }
+
+    .toggle-card {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:14px 16px;
+      border-radius:16px;
+      border:1px solid #e5e7eb;
+      background:#f9fbff;
+      cursor:pointer;
+      margin-top:12px;
+    }
+
+    .toggle-left {
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+
+    .toggle-icon {
+      width:40px;
+      height:40px;
+      border-radius:12px;
+      background:linear-gradient(135deg,var(--primary),#60a5fa);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:white;
+      font-size:18px;
+    }
+
+    .switch {
+      position:relative;
+      width:46px;
+      height:26px;
+    }
+
+    .switch input { opacity:0; }
+
+    .slider {
+      position:absolute;
+      inset:0;
+      background:#d1d5db;
+      border-radius:999px;
+      transition:.3s;
+    }
+
+    .slider:before {
+      content:"";
+      position:absolute;
+      height:20px;
+      width:20px;
+      left:3px;
+      bottom:3px;
+      background:white;
+      border-radius:50%;
+      transition:.3s;
+    }
+
+    .switch input:checked + .slider {
+      background:var(--primary);
+    }
+
+    .switch input:checked + .slider:before {
+      transform:translateX(20px);
+    }
+
+    #tipoCargaSection {
+      overflow:hidden;
+      max-height:0;
+      opacity:0;
+      transition:max-height .35s ease, opacity .25s ease;
+    }
+
+    #tipoCargaSection.show {
+      max-height:220px;
+      opacity:1;
+    }
+
+    .preset-row {
+      display:flex;
+      gap:8px;
+      margin-bottom:8px;
+    }
+
+    .preset {
+      flex:1;
+      padding:8px;
+      border-radius:12px;
+      border:1px solid #e5e7eb;
+      background:#f9fafb;
+      font-size:13px;
+      cursor:pointer;
+    }
+
+    .preset.active {
+      background:var(--primary);
+      color:white;
+    }
+
+    .tooltip {
+      font-size:12px;
+      color:var(--muted);
+      margin-bottom:6px;
+    }
+
+    .result { font-size:14px; line-height:1.6; }
+
+    .ok { color:var(--success); font-weight:600; }
+    .warning { color:var(--warning); font-weight:600; }
+    .info { color:var(--info); font-weight:600; }
+  </style>
+</head>
+
+<body>
+<div class="app">
+
+<header>
+  <div class="logo">EF</div>
+  <div>
+    <h1>Calculadora EcoFlow</h1>
+    <div class="subtitle">Respaldo • Solar • Off-Grid</div>
+  </div>
+</header>
+
+<div class="card">
+  <label>Carga continua promedio (W)</label>
+  <input type="number" id="watts" placeholder="Ej. 800">
+
+  <div class="toggle-card" onclick="toggleTipoCargaCard()">
+    <div class="toggle-left">
+      <div class="toggle-icon">⚡</div>
+      <div>
+        <div><b>Tipo de carga</b></div>
+        <div class="subtitle">Electrónica, motor o resistiva</div>
+      </div>
+    </div>
+    <label class="switch">
+      <input type="checkbox" id="activarTipoCarga" onchange="toggleTipoCarga()">
+      <span class="slider"></span>
+    </label>
+  </div>
+
+  <div id="tipoCargaSection">
+    <div class="preset-row">
+      <button class="preset" onclick="presetTipo('electronica',this)">💻 Electrónica</button>
+      <button class="preset" onclick="presetTipo('motor',this)">⚙️ Motor</button>
+      <button class="preset" onclick="presetTipo('resistiva',this)">🔥 Resistiva</button>
+    </div>
+    <div class="tooltip">Selecciona solo si el equipo tiene requerimientos especiales.</div>
+    <select id="tipoCarga">
+      <option value="electronica">Electrónica</option>
+      <option value="motor">Motor</option>
+      <option value="resistiva">Resistiva</option>
+    </select>
+  </div>
+
+  <div class="actions" style="margin-top:14px">
+    <button class="secondary" onclick="toggleSolar()">☀️ Modo solar</button>
+    <button class="danger" onclick="toggleOffGrid()">🏕️ Off-grid total</button>
+  </div>
+</div>
+
+<div id="solarSection" class="card" style="display:none">
+  <label>Paneles solares (W)</label>
+  <input type="number" id="solarWatts">
+  <label style="margin-top:10px">Horas solares efectivas</label>
+  <input type="number" id="sunHours">
+</div>
+
+<div id="offGridSection" class="card" style="display:none">
+  <label>Horas sin sol (noche)</label>
+  <input type="number" id="nightHours">
+</div>
+
+<div class="card">
+  <button class="primary" onclick="calcular()">Calcular recomendación</button>
+  <div id="resultado" class="result"></div>
+</div>
+
+</div>
+
+<script>
+let solarActivo=false;
+let offGridActivo=false;
+
+function toggleTipoCarga(){
+  const cb=document.getElementById('activarTipoCarga');
+  const sec=document.getElementById('tipoCargaSection');
+  cb.checked ? (sec.classList.add('show'), sec.scrollIntoView({behavior:'smooth'})) : sec.classList.remove('show');
+}
+
+function toggleTipoCargaCard(){
+  const cb=document.getElementById('activarTipoCarga');
+  cb.checked=!cb.checked;
+  toggleTipoCarga();
+}
+
+function presetTipo(tipo,btn){
+  document.getElementById('tipoCarga').value=tipo;
+  document.querySelectorAll('.preset').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function toggleSolar(){
+  solarActivo=!solarActivo;
+  document.getElementById('solarSection').style.display=solarActivo?'block':'none';
+}
+
+function toggleOffGrid(){
+  offGridActivo=!offGridActivo;
+  document.getElementById('offGridSection').style.display=offGridActivo?'block':'none';
+  if(offGridActivo && !solarActivo) toggleSolar();
+}
+
+function calcular(){
+  const watts=+document.getElementById('watts').value;
+  const usarTipo=document.getElementById('activarTipoCarga').checked;
+  const tipo=document.getElementById('tipoCarga').value;
+  const res=document.getElementById('resultado');
+
+  if(!watts){ res.innerHTML='<span class="warning">Ingresa una carga válida.</span>'; return; }
+
+  const equipos=[
+    {n:'River 3',c:245,m:300},
+    {n:'River 3 Plus',c:286,m:600},
+    {n:'River 3 Max',c:572,m:600},
+    {n:'Delta 3',c:1024,m:1800},
+    {n:'Delta 2 Max',c:2048,m:2400},
+    {n:'Delta Pro',c:3600,m:3600},
+    {n:'Delta Pro 3',c:4096,m:3600}
+  ];
+
+  let html='<b>Equipos compatibles:</b><br><br>';
+  let rec=null;
+
+  equipos.forEach(e=>{
+    if(watts<=e.m){
+      const h=(e.c/watts).toFixed(2);
+      html+=`• ${e.n}: ${h} h<br>`;
+      if(!rec){
+        if(!usarTipo && h>=2) rec=e;
+        if(usarTipo && tipo==='electronica' && h>=2) rec=e;
+        if(usarTipo && tipo==='motor' && h>=3) rec=e;
+        if(usarTipo && tipo==='resistiva' && h>=1) rec=e;
+      }
+    }
+  });
+
+  html+=rec?`<br><span class="ok">Recomendado: ${rec.n}</span>`:`<br><span class="warning">Ningún equipo adecuado.</span>`;
+  res.innerHTML=html;
+}
+
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('service-worker.js');
+}
+</script>
+</body>
+</html>
