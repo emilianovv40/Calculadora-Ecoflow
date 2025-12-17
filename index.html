@@ -1,216 +1,118 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#0a7cff" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0a7cff">
 
-  <title>Calculadora EcoFlow</title>
+<title>Calculadora EcoFlow</title>
 
-  <!-- PWA -->
-  <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="icon-192.png">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="Calculadora EcoFlow">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Calculadora EcoFlow">
 
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#0a7cff;
+  --card:#ffffff;
+  --text:#1f2937;
+  --muted:#6b7280;
+  --success:#16a34a;
+  --warning:#dc2626;
+  --info:#0284c7;
+}
+body{
+  margin:0;
+  font-family:system-ui,-apple-system,BlinkMacSystemFont;
+  background:linear-gradient(180deg,#eef3fb,#f9fbff);
+  padding:18px;
+  color:var(--text);
+}
+.app{max-width:1000px;margin:auto}
+header{display:flex;gap:12px;margin-bottom:16px}
+.logo{
+  width:44px;height:44px;border-radius:12px;
+  background:linear-gradient(135deg,var(--primary),#60a5fa);
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-weight:700
+}
+h1{margin:0;font-size:20px}
+.subtitle{font-size:13px;color:var(--muted)}
+.card{
+  background:var(--card);
+  border-radius:20px;
+  padding:20px;
+  box-shadow:0 18px 40px rgba(0,0,0,.08);
+  margin-bottom:16px;
+}
+label{font-size:13px;font-weight:600}
+input,select{
+  width:100%;padding:12px;border-radius:12px;
+  border:1px solid #e5e7eb;font-size:14px;margin-top:6px
+}
+button{
+  padding:14px;border-radius:14px;
+  border:none;font-weight:600;font-size:14px;cursor:pointer
+}
+.primary{background:var(--primary);color:#fff}
+.secondary{background:#eef2ff;color:var(--primary)}
+.danger{background:#fee2e2;color:#991b1b}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
 
-  <style>
-    :root {
-      --primary:#0a7cff;
-      --primary-dark:#055ec0;
-      --bg:#f4f7fb;
-      --card:#ffffff;
-      --text:#1f2937;
-      --muted:#6b7280;
-      --success:#16a34a;
-      --warning:#dc2626;
-      --info:#0284c7;
-    }
+.toggle-card{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px;border-radius:16px;border:1px solid #e5e7eb;
+  background:#f9fbff;margin-top:12px;cursor:pointer
+}
+.toggle-left{display:flex;gap:12px;align-items:center}
+.toggle-icon{
+  width:40px;height:40px;border-radius:12px;
+  background:linear-gradient(135deg,var(--primary),#60a5fa);
+  display:flex;align-items:center;justify-content:center;
+  color:white;font-size:18px
+}
+.switch{position:relative;width:46px;height:26px}
+.switch input{opacity:0}
+.slider{
+  position:absolute;inset:0;background:#d1d5db;
+  border-radius:999px;transition:.3s
+}
+.slider:before{
+  content:"";position:absolute;height:20px;width:20px;
+  left:3px;bottom:3px;background:#fff;
+  border-radius:50%;transition:.3s
+}
+.switch input:checked + .slider{background:var(--primary)}
+.switch input:checked + .slider:before{transform:translateX(20px)}
 
-    * { box-sizing:border-box; }
+#tipoCargaSection{
+  overflow:hidden;max-height:0;opacity:0;
+  transition:max-height .35s ease, opacity .25s ease
+}
+#tipoCargaSection.show{max-height:360px;opacity:1}
 
-    body {
-      margin:0;
-      font-family:'Inter', sans-serif;
-      background:linear-gradient(180deg,#eef3fb,#f9fbff);
-      color:var(--text);
-      padding:20px;
-    }
+.preset-row{display:flex;gap:8px;margin:8px 0}
+.preset{
+  flex:1;padding:8px;border-radius:12px;
+  border:1px solid #e5e7eb;background:#f9fafb;font-size:13px
+}
+.preset.active{background:var(--primary);color:#fff}
 
-    .app { max-width:900px; margin:auto; }
+.tooltip{font-size:12px;color:var(--muted)}
+.result{font-size:14px;line-height:1.6}
+.ok{color:var(--success);font-weight:600}
+.warning{color:var(--warning);font-weight:600}
+.info{color:var(--info);font-weight:600}
 
-    header {
-      display:flex;
-      align-items:center;
-      gap:12px;
-      margin-bottom:20px;
-    }
-
-    .logo {
-      width:44px;
-      height:44px;
-      border-radius:12px;
-      background:linear-gradient(135deg,var(--primary),#60a5fa);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      color:white;
-      font-weight:700;
-    }
-
-    h1 { font-size:20px; margin:0; }
-    .subtitle { font-size:13px; color:var(--muted); }
-
-    .card {
-      background:var(--card);
-      border-radius:20px;
-      padding:22px;
-      box-shadow:0 20px 40px rgba(0,0,0,.08);
-      margin-bottom:18px;
-    }
-
-    label {
-      font-size:13px;
-      font-weight:600;
-      display:block;
-      margin-bottom:6px;
-    }
-
-    input, select {
-      width:100%;
-      padding:12px;
-      border-radius:12px;
-      border:1px solid #e5e7eb;
-      font-size:14px;
-    }
-
-    button {
-      padding:14px;
-      border-radius:14px;
-      border:none;
-      font-weight:600;
-      cursor:pointer;
-      font-size:14px;
-    }
-
-    .primary { background:var(--primary); color:white; }
-    .secondary { background:#eef2ff; color:var(--primary); }
-    .danger { background:#fee2e2; color:#991b1b; }
-
-    .actions { display:flex; gap:10px; flex-wrap:wrap; }
-
-    .toggle-card {
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      padding:14px 16px;
-      border-radius:16px;
-      border:1px solid #e5e7eb;
-      background:#f9fbff;
-      cursor:pointer;
-      margin-top:12px;
-    }
-
-    .toggle-left {
-      display:flex;
-      align-items:center;
-      gap:12px;
-    }
-
-    .toggle-icon {
-      width:40px;
-      height:40px;
-      border-radius:12px;
-      background:linear-gradient(135deg,var(--primary),#60a5fa);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      color:white;
-      font-size:18px;
-    }
-
-    .switch {
-      position:relative;
-      width:46px;
-      height:26px;
-    }
-
-    .switch input { opacity:0; }
-
-    .slider {
-      position:absolute;
-      inset:0;
-      background:#d1d5db;
-      border-radius:999px;
-      transition:.3s;
-    }
-
-    .slider:before {
-      content:"";
-      position:absolute;
-      height:20px;
-      width:20px;
-      left:3px;
-      bottom:3px;
-      background:white;
-      border-radius:50%;
-      transition:.3s;
-    }
-
-    .switch input:checked + .slider {
-      background:var(--primary);
-    }
-
-    .switch input:checked + .slider:before {
-      transform:translateX(20px);
-    }
-
-    #tipoCargaSection {
-      overflow:hidden;
-      max-height:0;
-      opacity:0;
-      transition:max-height .35s ease, opacity .25s ease;
-    }
-
-    #tipoCargaSection.show {
-      max-height:220px;
-      opacity:1;
-    }
-
-    .preset-row {
-      display:flex;
-      gap:8px;
-      margin-bottom:8px;
-    }
-
-    .preset {
-      flex:1;
-      padding:8px;
-      border-radius:12px;
-      border:1px solid #e5e7eb;
-      background:#f9fafb;
-      font-size:13px;
-      cursor:pointer;
-    }
-
-    .preset.active {
-      background:var(--primary);
-      color:white;
-    }
-
-    .tooltip {
-      font-size:12px;
-      color:var(--muted);
-      margin-bottom:6px;
-    }
-
-    .result { font-size:14px; line-height:1.6; }
-
-    .ok { color:var(--success); font-weight:600; }
-    .warning { color:var(--warning); font-weight:600; }
-    .info { color:var(--info); font-weight:600; }
-  </style>
+table th,table td{
+  border:1px solid #e5e7eb;
+  padding:6px;
+  text-align:center;
+  vertical-align:middle;
+}
+table th{background:#f1f5f9}
+</style>
 </head>
 
 <body>
@@ -224,16 +126,18 @@
   </div>
 </header>
 
+<!-- ================= CARGA AC ================= -->
 <div class="card">
   <label>Carga continua promedio (W)</label>
-  <input type="number" id="watts" placeholder="Ej. 800">
+  <input id="watts" type="number" placeholder="Ej. 2000">
 
+  <!-- Tipo de carga -->
   <div class="toggle-card" onclick="toggleTipoCargaCard()">
     <div class="toggle-left">
       <div class="toggle-icon">⚡</div>
       <div>
-        <div><b>Tipo de carga</b></div>
-        <div class="subtitle">Electrónica, motor o resistiva</div>
+        <b>Tipo de carga</b>
+        <div class="subtitle">Opcional</div>
       </div>
     </div>
     <label class="switch">
@@ -248,30 +152,158 @@
       <button class="preset" onclick="presetTipo('motor',this)">⚙️ Motor</button>
       <button class="preset" onclick="presetTipo('resistiva',this)">🔥 Resistiva</button>
     </div>
-    <div class="tooltip">Selecciona solo si el equipo tiene requerimientos especiales.</div>
+
     <select id="tipoCarga">
       <option value="electronica">Electrónica</option>
       <option value="motor">Motor</option>
       <option value="resistiva">Resistiva</option>
     </select>
+
+    <!-- X-Boost -->
+    <div id="xboostSection" style="display:none;margin-top:12px">
+      <div class="toggle-card">
+        <div class="toggle-left">
+          <div class="toggle-icon">⚠️</div>
+          <div>
+            <b>X-Boost</b>
+            <div class="subtitle">Solo resistivo</div>
+          </div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="usarXboost">
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="tooltip">
+        No incrementa potencia real. No usar con electrónica sensible.
+      </div>
+    </div>
   </div>
 
   <div class="actions" style="margin-top:14px">
-    <button class="secondary" onclick="toggleSolar()">☀️ Modo solar</button>
-    <button class="danger" onclick="toggleOffGrid()">🏕️ Off-grid total</button>
+    <button class="secondary" onclick="toggleSolar()">☀️ Modo Solar</button>
+    <button class="danger" onclick="toggleOffGrid()">🏕️ Off-Grid total</button>
   </div>
 </div>
 
-<div id="solarSection" class="card" style="display:none">
-  <label>Paneles solares (W)</label>
-  <input type="number" id="solarWatts">
-  <label style="margin-top:10px">Horas solares efectivas</label>
-  <input type="number" id="sunHours">
+<!-- ================= SOLAR (TABLA) ================= -->
+<div id="solarSection" class="card" style="display:none;overflow-x:auto">
+  <h3>Compatibilidad Solar EcoFlow</h3>
+  <div class="tooltip">
+    Comparativo de paneles solares vs equipos EcoFlow
+  </div>
+
+  <table style="width:100%;margin-top:12px;font-size:12px">
+    <thead>
+      <tr>
+        <th>Panel</th>
+        <th>River 3<br>245Wh</th>
+        <th>River 3 Plus<br>286Wh</th>
+        <th>River 3 Max<br>572Wh</th>
+        <th>River 3 Max Plus<br>858Wh</th>
+        <th>Delta 3<br>1024Wh</th>
+        <th>Delta 2 Max<br>2048Wh</th>
+        <th>Delta Pro<br>3600Wh</th>
+        <th>Delta Pro 3<br>4096Wh</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>45W USB-C</td>
+        <td class="ok">Compatible<br>Lento</td>
+        <td class="ok">Compatible<br>Lento</td>
+        <td class="ok">Muy lento</td>
+        <td class="ok">Muy lento</td>
+        <td class="warning">No recomendado</td>
+        <td class="warning">No recomendado</td>
+        <td class="warning">No recomendado</td>
+        <td class="warning">No recomendado</td>
+      </tr>
+      <tr>
+        <td>60W USB-C</td>
+        <td class="ok">Compatible</td>
+        <td class="ok">Compatible</td>
+        <td class="ok">Muy lento</td>
+        <td class="ok">Muy lento</td>
+        <td class="warning">No recomendado</td>
+        <td class="warning">No recomendado</td>
+        <td class="warning">No recomendado</td>
+        <td class="warning">No recomendado</td>
+      </tr>
+      <tr>
+        <td>110W</td>
+        <td class="ok">Ideal</td>
+        <td class="ok">Ideal</td>
+        <td class="ok">Compatible</td>
+        <td class="ok">Muy lento</td>
+        <td class="ok">Muy lento</td>
+        <td class="warning">No recomendado</td>
+        <td class="warning">No recomendado</td>
+        <td class="warning">No recomendado</td>
+      </tr>
+      <tr>
+        <td>160W</td>
+        <td class="warning">No compatible</td>
+        <td class="ok">Carga rápida</td>
+        <td class="ok">Compatible</td>
+        <td class="ok">Carga lenta</td>
+        <td class="ok">Carga lenta</td>
+        <td class="warning">No recomendado</td>
+        <td class="warning">No recomendado</td>
+        <td class="warning">No recomendado</td>
+      </tr>
+      <tr>
+        <td>220W</td>
+        <td class="warning">No compatible</td>
+        <td class="ok">Carga rápida</td>
+        <td class="ok">Carga rápida</td>
+        <td class="ok">Compatible</td>
+        <td class="ok">Compatible</td>
+        <td class="ok">Muy lento</td>
+        <td class="warning">No recomendado</td>
+        <td class="warning">No recomendado</td>
+      </tr>
+      <tr>
+        <td>400W</td>
+        <td class="warning">No compatible</td>
+        <td class="warning">No compatible</td>
+        <td class="warning">No compatible</td>
+        <td class="warning">No compatible</td>
+        <td class="ok">Ideal</td>
+        <td class="ok">Compatible</td>
+        <td class="ok">Muy lento</td>
+        <td class="ok">Muy lento</td>
+      </tr>
+      <tr>
+        <td>400W ×2</td>
+        <td class="warning">No compatible</td>
+        <td class="warning">No compatible</td>
+        <td class="warning">No compatible</td>
+        <td class="warning">No compatible</td>
+        <td class="warning">No compatible</td>
+        <td class="ok">Carga rápida</td>
+        <td class="ok">Compatible</td>
+        <td class="ok">Carga lenta</td>
+      </tr>
+      <tr>
+        <td>400W ×3</td>
+        <td class="warning">No compatible</td>
+        <td class="warning">No compatible</td>
+        <td class="warning">No compatible</td>
+        <td class="warning">No compatible</td>
+        <td class="warning">No compatible</td>
+        <td class="warning">No compatible</td>
+        <td class="ok">Carga rápida</td>
+        <td class="ok">Carga rápida</td>
+      </tr>
+    </tbody>
+  </table>
 </div>
 
+<!-- ================= OFF-GRID ================= -->
 <div id="offGridSection" class="card" style="display:none">
   <label>Horas sin sol (noche)</label>
-  <input type="number" id="nightHours">
+  <input id="nightHours" type="number">
 </div>
 
 <div class="card">
@@ -282,45 +314,42 @@
 </div>
 
 <script>
-let solarActivo=false;
-let offGridActivo=false;
+let solar=false,offgrid=false;
 
 function toggleTipoCarga(){
-  const cb=document.getElementById('activarTipoCarga');
-  const sec=document.getElementById('tipoCargaSection');
-  cb.checked ? (sec.classList.add('show'), sec.scrollIntoView({behavior:'smooth'})) : sec.classList.remove('show');
+  activarTipoCarga.checked
+    ? (tipoCargaSection.classList.add('show'),
+       tipoCargaSection.scrollIntoView({behavior:'smooth'}))
+    : tipoCargaSection.classList.remove('show');
 }
-
 function toggleTipoCargaCard(){
-  const cb=document.getElementById('activarTipoCarga');
-  cb.checked=!cb.checked;
+  activarTipoCarga.checked=!activarTipoCarga.checked;
   toggleTipoCarga();
 }
-
 function presetTipo(tipo,btn){
-  document.getElementById('tipoCarga').value=tipo;
+  tipoCarga.value=tipo;
   document.querySelectorAll('.preset').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
+  xboostSection.style.display = tipo==='resistiva'?'block':'none';
+  if(tipo!=='resistiva') usarXboost.checked=false;
 }
-
 function toggleSolar(){
-  solarActivo=!solarActivo;
-  document.getElementById('solarSection').style.display=solarActivo?'block':'none';
+  solar=!solar;
+  solarSection.style.display=solar?'block':'none';
 }
-
 function toggleOffGrid(){
-  offGridActivo=!offGridActivo;
-  document.getElementById('offGridSection').style.display=offGridActivo?'block':'none';
-  if(offGridActivo && !solarActivo) toggleSolar();
+  offgrid=!offgrid;
+  offGridSection.style.display=offgrid?'block':'none';
+  if(offgrid && !solar) toggleSolar();
 }
 
+/* ================= CÁLCULO AC ================= */
 function calcular(){
-  const watts=+document.getElementById('watts').value;
-  const usarTipo=document.getElementById('activarTipoCarga').checked;
-  const tipo=document.getElementById('tipoCarga').value;
-  const res=document.getElementById('resultado');
-
-  if(!watts){ res.innerHTML='<span class="warning">Ingresa una carga válida.</span>'; return; }
+  const w=+watts.value;
+  if(!w){
+    resultado.innerHTML='<span class="warning">Ingresa una carga válida</span>';
+    return;
+  }
 
   const equipos=[
     {n:'River 3',c:245,m:300},
@@ -332,27 +361,51 @@ function calcular(){
     {n:'Delta Pro 3',c:4096,m:3600}
   ];
 
-  let html='<b>Equipos compatibles:</b><br><br>';
-  let rec=null;
+  let compatibles=[],xboostSolo=[],recomendado=null;
 
   equipos.forEach(e=>{
-    if(watts<=e.m){
-      const h=(e.c/watts).toFixed(2);
-      html+=`• ${e.n}: ${h} h<br>`;
-      if(!rec){
-        if(!usarTipo && h>=2) rec=e;
-        if(usarTipo && tipo==='electronica' && h>=2) rec=e;
-        if(usarTipo && tipo==='motor' && h>=3) rec=e;
-        if(usarTipo && tipo==='resistiva' && h>=1) rec=e;
-      }
+    if(w<=e.m){
+      const h=(e.c/w).toFixed(2);
+      compatibles.push({ ...e,h });
+      if(!recomendado && h>=2) recomendado=e;
+    }
+    if(
+      activarTipoCarga.checked &&
+      tipoCarga.value==='resistiva' &&
+      usarXboost.checked
+    ){
+      const lim=e.m*1.3;
+      if(w>e.m && w<=lim) xboostSolo.push(e.n);
     }
   });
 
-  html+=rec?`<br><span class="ok">Recomendado: ${rec.n}</span>`:`<br><span class="warning">Ningún equipo adecuado.</span>`;
-  res.innerHTML=html;
+  let html='<b>Equipos compatibles:</b><br><br>';
+  if(compatibles.length){
+    compatibles.forEach(e=>{
+      html+=`• ${e.n}: ${e.h} h<br>`;
+    });
+  }else{
+    html+='<span class="warning">Ningún equipo soporta esta carga directamente</span><br>';
+  }
+
+  html+=recomendado
+    ? `<br><span class="ok">Recomendado: ${recomendado.n}</span>`
+    : `<br><span class="warning">Sin recomendación directa</span>`;
+
+  if(xboostSolo.length){
+    html+=`
+      <br><br>
+      <span class="info">⚠️ Equipos que podrían operar con X-Boost</span><br>
+      <small>
+        ${xboostSolo.join(', ')}<br>
+        Solo para cargas resistivas. No incrementa potencia real.
+      </small>`;
+  }
+
+  resultado.innerHTML=html;
 }
 
-if('serviceWorker' in navigator){
+if('serviceWorker'in navigator){
   navigator.serviceWorker.register('service-worker.js');
 }
 </script>
